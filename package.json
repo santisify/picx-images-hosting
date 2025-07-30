@@ -1,6 +1,6 @@
 {
   "name": "picx-images",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "[PicX](https://github.com/XPoet/picx) is a simple and powerful image hosting tool. It supports image hosting services via GitHub repository.",
   "main": "index.js",
   "files": [
