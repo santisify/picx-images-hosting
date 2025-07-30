@@ -18,8 +18,7 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
-      # 无需安装依赖 (无依赖包)
-      - name: Build package (if needed)
+      - name: Build package
         run: npm run build --if-present  # 可选构建步骤
 
       - name: Publish to npm
