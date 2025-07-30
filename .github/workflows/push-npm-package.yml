@@ -8,9 +8,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要完整的提交历史来分析版本更新
+          token: ${{ secrets.GITHUBTOKEN }}  # 使用具有写权限的 token
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
-      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_ACCESS_TOKEN }}" > .npmrc
-      - run: npm publish
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version and create tag
+        id: version-bump
+        uses: zwaldowski/semantic-release-action@v3
+        with:
+          github_token: ${{ secrets.GITHUBTOKEN }}
+          npm_token: ${{ secrets.NPM_ACCESS_TOKEN }}
+          extra_plugins: |
+            @semantic-release/git
+            @semantic-release/changelog
+
+      - name: Publish to npm
+        if: steps.version-bump.outputs.new_release_published == 'true'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
