@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Pages 图片展示</title>
     <style>
+        :root {
+            --primary-color: #2ea44f;
+            --primary-dark: #2c974b;
+            --text-color: #333;
+            --light-text: #586069;
+            --background: #f8f9fa;
+            --card-bg: #fff;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,89 +24,148 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f8f9fa;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            padding: 30px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #6f42c1, #d73a49);
         }
         
         h1 {
             color: #24292e;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 2.5rem;
+            font-weight: 700;
         }
         
         .description {
-            color: #586069;
-            max-width: 600px;
+            color: var(--light-text);
+            max-width: 700px;
             margin: 0 auto;
+            font-size: 1.1rem;
         }
         
         .controls {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 15px;
-            margin: 20px 0;
+            margin: 30px 0;
             flex-wrap: wrap;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
         }
         
-        input, button {
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        input {
-            flex-grow: 1;
-            max-width: 400px;
+        .repo-info {
+            font-size: 1.1rem;
+            color: var(--light-text);
+            font-weight: 500;
         }
         
         button {
-            background-color: #2ea44f;
-            color: white;
+            padding: 12px 24px;
             border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        button:hover {
-            background-color: #2c974b;
+        #loadBtn {
+            background-color: var(--primary-color);
+            color: white;
         }
         
-        button:disabled {
+        #loadBtn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        #loadBtn:disabled {
             background-color: #94d3a2;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--light-text);
         }
         
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 40px;
             display: none;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
         }
         
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #2ea44f;
+            border-left-color: var(--primary-color);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 auto 15px;
         }
         
         @keyframes spin {
@@ -104,45 +175,55 @@
         .error {
             background-color: #f8d7da;
             color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
+            padding: 20px;
+            border-radius: var(--border-radius);
             margin: 20px 0;
             text-align: center;
             display: none;
+            box-shadow: var(--shadow);
         }
         
         .image-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
             margin-top: 30px;
         }
         
         .image-card {
-            background-color: white;
-            border-radius: 10px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
         }
         
         .image-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
         }
         
         .image-container {
             width: 100%;
-            height: 200px;
             overflow: hidden;
             position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            background: #f8f9fa;
         }
         
         .image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
+            max-width: 100%;
+            max-height: 400px;
+            width: auto;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
         }
         
         .image-card:hover .image-container img {
@@ -150,32 +231,70 @@
         }
         
         .image-info {
-            padding: 15px;
+            padding: 18px;
+            border-top: 1px solid #f0f0f0;
         }
         
         .image-name {
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            word-break: break-all;
+            font-size: 1.05rem;
+        }
+        
+        .image-path {
+            color: var(--light-text);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
             word-break: break-all;
         }
         
         .image-size {
-            color: #586069;
-            font-size: 14px;
+            color: var(--light-text);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
         }
         
         .empty-state {
             text-align: center;
-            padding: 40px;
-            color: #586069;
+            padding: 60px 40px;
+            color: var(--light-text);
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #d1d5da;
         }
         
         footer {
             text-align: center;
-            margin-top: 40px;
+            margin-top: 50px;
             padding: 20px;
-            color: #586069;
-            font-size: 14px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+        
+        .view-options {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        
+        .view-btn {
+            background-color: #f1f3f4;
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+        
+        .view-btn.active {
+            background-color: var(--primary-color);
+            color: white;
         }
         
         @media (max-width: 768px) {
@@ -183,27 +302,59 @@
                 flex-direction: column;
             }
             
-            input {
-                max-width: 100%;
+            .view-options {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>GitHub Pages 图片展示器</h1>
-            <p class="description">自动获取并展示GitHub仓库根目录下的所有图片文件</p>
+            <p class="description">自动获取并展示当前GitHub仓库中的所有图片文件，包括子目录中的图片</p>
         </header>
         
         <div class="controls">
-            <input type="text" id="repoInput" placeholder="输入GitHub仓库地址，例如：username/repository">
-            <button id="loadBtn">加载图片</button>
+            <div class="repo-info" id="repoInfo">正在检测当前仓库...</div>
+            <div class="view-options">
+                <button class="view-btn active" id="gridView"><i class="fas fa-th"></i> 网格视图</button>
+                <button class="view-btn" id="listView"><i class="fas fa-list"></i> 列表视图</button>
+            </div>
+            <button id="loadBtn">
+                <i class="fas fa-sync-alt"></i> 加载图片
+            </button>
+        </div>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-item">
+                <span class="stat-value" id="totalImages">0</span>
+                <span class="stat-label">总图片数</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalSize">0</span>
+                <span class="stat-label">总大小</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="foldersCount">0</span>
+                <span class="stat-label">文件夹数</span>
+            </div>
         </div>
         
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>正在获取图片信息...</p>
+            <p>正在扫描仓库中的图片文件...</p>
         </div>
         
         <div class="error" id="error"></div>
@@ -211,48 +362,75 @@
         <div class="image-grid" id="imageGrid"></div>
         
         <div class="empty-state" id="emptyState">
-            <p>请输入GitHub仓库地址并点击"加载图片"按钮</p>
+            <i class="far fa-images"></i>
+            <h3>准备加载图片</h3>
+            <p>点击"加载图片"按钮开始扫描当前仓库中的所有图片文件</p>
         </div>
         
         <footer>
-            <p>GitHub Pages 图片展示器 &copy; 2023</p>
+            <p>GitHub Pages 图片展示器 &copy; 2023 | 自动检测当前仓库</p>
         </footer>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const repoInput = document.getElementById('repoInput');
+            const repoInfo = document.getElementById('repoInfo');
             const loadBtn = document.getElementById('loadBtn');
             const loading = document.getElementById('loading');
             const error = document.getElementById('error');
             const imageGrid = document.getElementById('imageGrid');
             const emptyState = document.getElementById('emptyState');
+            const stats = document.getElementById('stats');
+            const totalImages = document.getElementById('totalImages');
+            const totalSize = document.getElementById('totalSize');
+            const foldersCount = document.getElementById('foldersCount');
+            const gridViewBtn = document.getElementById('gridView');
+            const listViewBtn = document.getElementById('listView');
             
             // 支持的图片格式
             const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
             
+            // 当前仓库信息
+            let currentRepo = '';
+            
+            // 检测当前仓库
+            function detectCurrentRepo() {
+                // 从当前URL提取仓库信息
+                const pathSegments = window.location.pathname.split('/');
+                if (pathSegments.length >= 3) {
+                    // GitHub Pages项目站点的URL格式: /username/repository/
+                    currentRepo = `${pathSegments[1]}/${pathSegments[2]}`;
+                    repoInfo.textContent = `当前仓库: ${currentRepo}`;
+                } else {
+                    // 如果无法自动检测，使用默认值或提示用户
+                    currentRepo = '';
+                    repoInfo.textContent = '无法自动检测仓库，请手动设置';
+                    showError('无法自动检测当前GitHub仓库，请确保此页面通过GitHub Pages访问');
+                }
+            }
+            
+            // 初始化时检测仓库
+            detectCurrentRepo();
+            
             // 加载按钮点击事件
             loadBtn.addEventListener('click', loadImages);
             
-            // 回车键触发加载
-            repoInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    loadImages();
-                }
+            // 视图切换
+            gridViewBtn.addEventListener('click', function() {
+                gridViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                imageGrid.classList.remove('list-view');
             });
             
-            function loadImages() {
-                const repoPath = repoInput.value.trim();
-                
-                if (!repoPath) {
-                    showError('请输入GitHub仓库地址');
-                    return;
-                }
-                
-                // 验证仓库地址格式
-                const repoRegex = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
-                if (!repoRegex.test(repoPath)) {
-                    showError('仓库地址格式不正确，请使用格式：username/repository');
+            listViewBtn.addEventListener('click', function() {
+                listViewBtn.classList.add('active');
+                gridViewBtn.classList.remove('active');
+                imageGrid.classList.add('list-view');
+            });
+            
+            async function loadImages() {
+                if (!currentRepo) {
+                    showError('无法确定当前仓库，请确保此页面通过GitHub Pages访问');
                     return;
                 }
                 
@@ -261,40 +439,81 @@
                 error.style.display = 'none';
                 imageGrid.innerHTML = '';
                 emptyState.style.display = 'none';
+                stats.style.display = 'none';
                 loadBtn.disabled = true;
                 
-                // 使用GitHub API获取仓库内容
-                fetch(`https://api.github.com/repos/${repoPath}/contents/`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('获取仓库内容失败，请检查仓库地址是否正确且为公开仓库');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // 筛选图片文件
-                        const images = data.filter(item => {
-                            if (item.type !== 'file') return false;
-                            
+                try {
+                    // 获取仓库中的所有图片文件
+                    const images = await getAllImages(currentRepo);
+                    
+                    if (images.length === 0) {
+                        showEmptyState('该仓库中没有找到图片文件');
+                        return;
+                    }
+                    
+                    // 显示统计信息
+                    displayStats(images);
+                    
+                    // 显示图片
+                    displayImages(images, currentRepo);
+                } catch (err) {
+                    showError(err.message);
+                } finally {
+                    loading.style.display = 'none';
+                    loadBtn.disabled = false;
+                }
+            }
+            
+            // 递归获取仓库中的所有图片
+            async function getAllImages(repoPath, path = '') {
+                let allImages = [];
+                
+                try {
+                    const apiUrl = `https://api.github.com/repos/${repoPath}/contents/${path}`;
+                    const response = await fetch(apiUrl);
+                    
+                    if (!response.ok) {
+                        throw new Error('获取仓库内容失败，请检查仓库地址是否正确且为公开仓库');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    for (const item of data) {
+                        if (item.type === 'dir') {
+                            // 递归获取子目录中的图片
+                            const subImages = await getAllImages(repoPath, item.path);
+                            allImages = allImages.concat(subImages);
+                        } else if (item.type === 'file') {
+                            // 检查是否为图片文件
                             const extension = item.name.split('.').pop().toLowerCase();
-                            return imageExtensions.includes(extension);
-                        });
-                        
-                        if (images.length === 0) {
-                            showEmptyState('该仓库根目录下没有找到图片文件');
-                            return;
+                            if (imageExtensions.includes(extension)) {
+                                allImages.push({
+                                    ...item,
+                                    folder: path || '根目录'
+                                });
+                            }
                         }
-                        
-                        // 显示图片
-                        displayImages(images, repoPath);
-                    })
-                    .catch(err => {
-                        showError(err.message);
-                    })
-                    .finally(() => {
-                        loading.style.display = 'none';
-                        loadBtn.disabled = false;
-                    });
+                    }
+                } catch (error) {
+                    console.error('获取图片时出错:', error);
+                    throw error;
+                }
+                
+                return allImages;
+            }
+            
+            function displayStats(images) {
+                // 计算总大小
+                const totalBytes = images.reduce((sum, image) => sum + image.size, 0);
+                
+                // 计算不同文件夹数量
+                const folders = new Set(images.map(img => img.folder));
+                
+                totalImages.textContent = images.length;
+                totalSize.textContent = formatFileSize(totalBytes);
+                foldersCount.textContent = folders.size;
+                
+                stats.style.display = 'flex';
             }
             
             function displayImages(images, repoPath) {
@@ -310,7 +529,7 @@
                     
                     // 图片元素
                     const img = document.createElement('img');
-                    img.src = `https://cdn.jsdelivr.net/gh/${repoPath}@master/${image.name}`;
+                    img.src = `https://cdn.jsdelivr.net/gh/${repoPath}@master/${image.path}`;
                     img.alt = image.name;
                     img.loading = 'lazy';
                     
@@ -322,13 +541,21 @@
                     imageName.className = 'image-name';
                     imageName.textContent = image.name;
                     
+                    const imagePath = document.createElement('div');
+                    imagePath.className = 'image-path';
+                    imagePath.textContent = image.folder;
+                    
                     const imageSize = document.createElement('div');
                     imageSize.className = 'image-size';
-                    imageSize.textContent = formatFileSize(image.size);
+                    imageSize.innerHTML = `
+                        <span>${formatFileSize(image.size)}</span>
+                        <span>${image.name.split('.').pop().toUpperCase()}</span>
+                    `;
                     
                     // 组装元素
                     imageContainer.appendChild(img);
                     imageInfo.appendChild(imageName);
+                    imageInfo.appendChild(imagePath);
                     imageInfo.appendChild(imageSize);
                     card.appendChild(imageContainer);
                     card.appendChild(imageInfo);
@@ -343,12 +570,18 @@
                 error.textContent = message;
                 error.style.display = 'block';
                 emptyState.style.display = 'none';
+                stats.style.display = 'none';
             }
             
             function showEmptyState(message) {
-                emptyState.innerHTML = `<p>${message}</p>`;
+                emptyState.innerHTML = `
+                    <i class="far fa-folder-open"></i>
+                    <h3>${message}</h3>
+                    <p>请检查仓库中是否有图片文件，或尝试刷新页面</p>
+                `;
                 emptyState.style.display = 'block';
                 imageGrid.innerHTML = '';
+                stats.style.display = 'none';
             }
             
             function formatFileSize(bytes) {
