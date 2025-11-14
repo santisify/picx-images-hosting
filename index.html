@@ -565,7 +565,7 @@
                     // 图片元素
                     const img = document.createElement('img');
                     // 使用raw.githubusercontent.com直接访问图片
-                    img.src = `https://raw.githubusercontent.com/${repoPath}/main/${image.path}`;
+                    img.src = `https://cdn.jsdelivr.net/gh/${repoPath}@master/${image.path}`;
                     img.alt = image.name;
                     img.loading = 'lazy';
                     
