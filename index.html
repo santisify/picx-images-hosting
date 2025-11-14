@@ -396,16 +396,34 @@
             // 检测当前仓库
             function detectCurrentRepo() {
                 // 从当前URL提取仓库信息
-                const pathSegments = window.location.pathname.split('/');
-                if (pathSegments.length >= 3) {
-                    // GitHub Pages项目站点的URL格式: /username/repository/
-                    currentRepo = `${pathSegments[1]}/${pathSegments[2]}`;
+                const hostname = window.location.hostname;
+                const pathSegments = window.location.pathname.split('/').filter(segment => segment);
+                
+                // 如果是GitHub Pages自定义域名
+                if (hostname !== 'github.io' && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                    // 无法自动检测，需要手动设置
+                    currentRepo = '';
+                    repoInfo.textContent = '使用自定义域名，无法自动检测仓库';
+                    showError('使用自定义域名时无法自动检测仓库，请手动设置仓库信息');
+                    return;
+                }
+                
+                // 如果是GitHub Pages项目站点
+                if (pathSegments.length >= 2) {
+                    // GitHub Pages项目站点的URL格式: username.github.io/repository
+                    const username = hostname.split('.')[0];
+                    const repository = pathSegments[0];
+                    currentRepo = `${username}/${repository}`;
+                    repoInfo.textContent = `当前仓库: ${currentRepo}`;
+                } else if (pathSegments.length === 0) {
+                    // 用户站点 (username.github.io)
+                    const username = hostname.split('.')[0];
+                    currentRepo = `${username}/${username}.github.io`;
                     repoInfo.textContent = `当前仓库: ${currentRepo}`;
                 } else {
-                    // 如果无法自动检测，使用默认值或提示用户
                     currentRepo = '';
-                    repoInfo.textContent = '无法自动检测仓库，请手动设置';
-                    showError('无法自动检测当前GitHub仓库，请确保此页面通过GitHub Pages访问');
+                    repoInfo.textContent = '无法自动检测仓库';
+                    showError('无法自动检测当前GitHub仓库，请手动设置仓库信息');
                 }
             }
             
@@ -430,7 +448,7 @@
             
             async function loadImages() {
                 if (!currentRepo) {
-                    showError('无法确定当前仓库，请确保此页面通过GitHub Pages访问');
+                    showError('无法确定当前仓库，请尝试手动设置仓库信息');
                     return;
                 }
                 
@@ -457,7 +475,8 @@
                     // 显示图片
                     displayImages(images, currentRepo);
                 } catch (err) {
-                    showError(err.message);
+                    console.error('获取图片时出错:', err);
+                    showError('获取图片失败: ' + err.message);
                 } finally {
                     loading.style.display = 'none';
                     loadBtn.disabled = false;
@@ -470,13 +489,29 @@
                 
                 try {
                     const apiUrl = `https://api.github.com/repos/${repoPath}/contents/${path}`;
+                    console.log('请求URL:', apiUrl);
+                    
                     const response = await fetch(apiUrl);
                     
                     if (!response.ok) {
-                        throw new Error('获取仓库内容失败，请检查仓库地址是否正确且为公开仓库');
+                        throw new Error(`获取仓库内容失败 (${response.status}): 请检查仓库地址是否正确且为公开仓库`);
                     }
                     
                     const data = await response.json();
+                    
+                    // 如果返回的是单个文件而不是数组
+                    if (!Array.isArray(data)) {
+                        if (data.type === 'file') {
+                            const extension = data.name.split('.').pop().toLowerCase();
+                            if (imageExtensions.includes(extension)) {
+                                allImages.push({
+                                    ...data,
+                                    folder: path || '根目录'
+                                });
+                            }
+                        }
+                        return allImages;
+                    }
                     
                     for (const item of data) {
                         if (item.type === 'dir') {
@@ -529,7 +564,8 @@
                     
                     // 图片元素
                     const img = document.createElement('img');
-                    img.src = `https://cdn.jsdelivr.net/gh/${repoPath}@master/${image.path}`;
+                    // 使用raw.githubusercontent.com直接访问图片
+                    img.src = `https://raw.githubusercontent.com/${repoPath}/main/${image.path}`;
                     img.alt = image.name;
                     img.loading = 'lazy';
                     
@@ -567,7 +603,13 @@
             }
             
             function showError(message) {
-                error.textContent = message;
+                error.innerHTML = `
+                    <h3><i class="fas fa-exclamation-triangle"></i> 错误</h3>
+                    <p>${message}</p>
+                    <p style="margin-top: 10px; font-size: 0.9em;">
+                        提示：请确保仓库是公开的，并且包含图片文件。
+                    </p>
+                `;
                 error.style.display = 'block';
                 emptyState.style.display = 'none';
                 stats.style.display = 'none';
@@ -592,6 +634,37 @@
                 const i = Math.floor(Math.log(bytes) / Math.log(k));
                 
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // 添加手动设置仓库的功能
+            function addManualRepoInput() {
+                const controls = document.querySelector('.controls');
+                const manualInput = document.createElement('div');
+                manualInput.style.marginTop = '15px';
+                manualInput.style.width = '100%';
+                manualInput.style.display = 'flex';
+                manualInput.style.gap = '10px';
+                manualInput.innerHTML = `
+                    <input type="text" id="manualRepo" placeholder="手动输入仓库: username/repository" style="flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <button id="setRepoBtn" style="background-color: #0366d6; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">设置仓库</button>
+                `;
+                controls.appendChild(manualInput);
+                
+                document.getElementById('setRepoBtn').addEventListener('click', function() {
+                    const repo = document.getElementById('manualRepo').value.trim();
+                    if (repo && repo.includes('/')) {
+                        currentRepo = repo;
+                        repoInfo.textContent = `当前仓库: ${currentRepo}`;
+                        error.style.display = 'none';
+                    } else {
+                        showError('请输入有效的仓库地址，格式: username/repository');
+                    }
+                });
+            }
+            
+            // 如果自动检测失败，添加手动输入功能
+            if (!currentRepo) {
+                addManualRepoInput();
             }
         });
     </script>
